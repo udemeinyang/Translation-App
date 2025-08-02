@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Translation</string>
+    <string name="english">English:</string>
+    <string name="enter_the_in_english">Enter the in English</string>
+    <string name="translate_to_hindu">Translate to Hindu</string>
+    <string name="hindi">Hindi</string>
+    <string name="output">Output</string>
+    <string name="username">Username</string>
+</resources>
