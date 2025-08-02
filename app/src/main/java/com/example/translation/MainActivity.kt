@@ -8,22 +8,65 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.mlkit.common.model.DownloadConditions
 import com.google.mlkit.nl.translate.TranslateLanguage
 import com.google.mlkit.nl.translate.Translation
+import com.google.mlkit.nl.translate.Translator
 import com.google.mlkit.nl.translate.TranslatorOptions
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var translator: Translator
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-       val inputEditTextEditText = findViewById<EditText>(R.id.inputEditText)
-        val translateButton = findViewById<Button>(R.id.TranslateButton)t>(R.id.inputEditText)
-        val outputText = findViewById<TextView>(R.id.outputText)>(R.id.inputEditText)
+       val inputEditText = findViewById<EditText>(R.id.inputEditText)
+        val translateButton = findViewById<Button>(R.id.TranslateButton)
+        val outputText = findViewById<TextView>(R.id.outputText)
 
         // Create an English-German translator:
         val options = TranslatorOptions.Builder()
             .setSourceLanguage(TranslateLanguage.ENGLISH)
-            .setTargetLanguage(TranslateLanguage.GERMAN)
+            .setTargetLanguage(TranslateLanguage.HINDI)
             .build()
-        val englishGermanTranslator = Translation.getClient(options)
+         translator = Translation.getClient(options)
+
+
+        val conditions = DownloadConditions.Builder()
+            .requireWifi()
+            .build()
+        translator.downloadModelIfNeeded(conditions)
+            .addOnSuccessListener {
+                translateButton.setOnClickListener {
+                    val textToTranslate = inputEditText.text.toString()
+                    translateText(textToTranslate, outputText)
+                }
+                // Model downloaded successfully. Okay to start translating.
+                // (Set a flag, unhide the translation UI, etc.)
+            }
+            .addOnFailureListener { exception ->
+                outputText.text = "Model Download Fails"
+
+                // Model couldn’t be downloaded or other internal error.
+                // ...
+            }
+    }
+
+    private fun translateText(inputText: String, outputTextView: TextView){
+        translator.translate(inputText)
+            .addOnSuccessListener { translatedText ->
+                outputTextView.text = translatedText
+                // Translation successful.
+            }
+            .addOnFailureListener { exception ->
+                outputTextView.text = "Translation Fails"
+                // Error.
+                // ...
+            }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        translator.close()
     }
 }
